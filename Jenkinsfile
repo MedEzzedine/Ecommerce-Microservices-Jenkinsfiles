@@ -6,20 +6,34 @@ pipeline {
 //     jdk 'Java17'
 // }
 
+    options {
+        skipDefaultCheckout()
+    }
 
     stages {
-        stage('ls') {
-            steps {
-                sh "ls"
-            }
-        }
 
-        stage('Compile') {
-            steps {
-                echo "Hello from main"
+        stage('Test branch pipeline') {
+
+            when {
+                branch 'main'
+                beforeAgent true
+                beforeOptions true
+            }
+
+            stages {
+                stage('Git checkout') {
+                    steps {
+                        checkout changelog: false, poll: false, scm: scmGit(branches: [[name: 'main']], extensions: [], userRemoteConfigs: [[credentialsId: 'github_credentials', url: 'https://github.com/MedEzzedine/Ecommerce-Microservices']])
+                    }
+                }
+
+                stage("Update deployment version in manifests for ArgoCD") {
+                    steps {
+                        echo "Update manifests for ArgoCD"
+                    }
+                }
             }
         }
-        
     }
 }
 
