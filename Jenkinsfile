@@ -34,14 +34,7 @@ pipeline {
                 stage('Compile') {
                     steps {
                         script {
-                            for (changeList in currentBuild.changeSets) {
-                                for(change in changeList) {
-                                    for (path in change.getPaths()) {
-                                        echo "${path}"
-                                    }
-                                }
-                                
-                            }
+                            echo "${getPRChangeLog(env.CHANGE_TARGET)}"
                         }
                     }
                 }
@@ -108,3 +101,9 @@ pipeline {
     }
 }
 
+def getPRChangeLog(target) {
+    return sh(
+            script: "git --no-pager diff origin/${target} --name-only",
+            returnStdout: true
+    ).split('\n')
+}
