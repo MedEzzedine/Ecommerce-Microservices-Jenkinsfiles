@@ -34,10 +34,13 @@ pipeline {
                 stage('Compile') {
                     steps {
                         script {
-                            for (change in currentBuild.changeSets) {
-                                for (path in change.getPaths()) {
-                                    echo "${path}"
+                            for (changeList in currentBuild.changeSets) {
+                                for(change in changeList) {
+                                    for (path in change.getPaths()) {
+                                        echo "${path}"
+                                    }
                                 }
+                                
                             }
                         }
                     }
