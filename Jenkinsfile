@@ -34,10 +34,11 @@ pipeline {
                 stage('Compile') {
                     steps {
                         script {
-                            if(changeset "micro-services/ecomm-product/**/*.*") {
-                                echo "Product Changed"
-                            } else {
-                                echo "Nothing changed"
+                            for (change in currentBuild.changeSets) {
+                                echo "${change}"
+                                for (path in change.paths) {
+                                    echo "${path}"
+                                }
                             }
                         }
                     }
