@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent none
 
 // tools {
 //     maven 'Maven3'
@@ -11,48 +11,87 @@ pipeline {
     }
 
     stages {
-
-        stage('Test branch pipeline') {
-
+        
+        stage('Feature PR to dev') {
             when {
-                branch 'test'
+                changeRequest target: 'dev/*', comparator: "GLOB"
+                changeRequest branch: 'feature/*', comparator: "GLOB"
+                not { changeRequest branch: 'feature/frontend*', comparator: "GLOB" }
                 beforeAgent true
                 beforeOptions true
             }
 
+            agent any
+
             stages {
+
                 stage('Git checkout') {
+                        steps {
+                            checkout changelog: false, poll: false, scm: scmGit(branches: [[name: env.CHANGE_BRANCH]], extensions: [], userRemoteConfigs: [[credentialsId: 'github_credentials', url: 'https://github.com/MedEzzedine/Ecommerce-Microservices']])
+                        }
+                    }
+                    
+                stage('Compile') {
                     steps {
-                        checkout changelog: false, poll: false, scm: scmGit(branches: [[name: 'test']], extensions: [], userRemoteConfigs: [[credentialsId: 'github_credentials', url: 'https://github.com/MedEzzedine/Ecommerce-Microservices']])
+                        echo "Compile"
                     }
                 }
-                stage('Build docker image') {
+                stage('Unit testing') {
                     steps {
-                        echo "Build docker image"
+                        echo "Unit testing"
                     }
                 }
+                stage('Build Stage') {
+                    steps {
+                        echo "Building"
+                    }
+                }
+                stage('SonarQube SAST') {
+                    steps {
+                        echo "SonarQube SAST"
+                    }
+                }
+                stage('Quality Gates') {
+                    steps {
+                        echo "Quality "
+                    }
+                }
+            }
+        }
 
-                stage('Vulnerability scan') {
+        
+
+        stage('Frontend Feature PR to dev') {
+            when {
+                changeRequest target: 'dev/*', comparator: "GLOB"
+                changeRequest branch: 'feature/frontend*', comparator: "GLOB"
+                beforeAgent true
+                beforeOptions true
+            }
+
+            agent any
+
+            stages {
+
+                stage('Git checkout') {
+                        steps {
+                            checkout changelog: false, poll: false, scm: scmGit(branches: [[name: env.CHANGE_BRANCH]], extensions: [], userRemoteConfigs: [[credentialsId: 'github_credentials', url: 'https://github.com/MedEzzedine/Ecommerce-Microservices']])
+                        }
+                    }
+                    
+                stage('Compile') {
                     steps {
-                        echo "Vulnerability scan"
+                        echo "Compile"
                     }
                 }
-
-                stage('Push to Dockerhub') {
+                stage('Unit testing') {
                     steps {
-                        echo "Push to Dockerhub"
+                        echo "Unit testing"
                     }
                 }
-
-                stage('Kubectl apply new deployment') {
+                stage('Build Stage') {
                     steps {
-                        echo "Kubectl apply new deployment"
-                    }
-                }
-
-                stage('Integration testing') {
-                    steps {
-                        echo "Integration testing"
+                        echo "Building"
                     }
                 }
             }
