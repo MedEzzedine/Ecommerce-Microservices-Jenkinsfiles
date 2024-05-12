@@ -11,7 +11,12 @@ pipeline {
     }
 
     stages {
-        
+
+        stage('ls') {
+            steps {
+                echo "${CHANGE_BRANCH} and ${CHANGE_TARGET} and ${BRANCH_NAME}"
+            }
+        }       
         stage('Feature PR to dev') {
             when {
                 changeRequest target: 'dev/*', comparator: "GLOB"
