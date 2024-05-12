@@ -33,7 +33,13 @@ pipeline {
                     
                 stage('Compile') {
                     steps {
-                        echo "Compile"
+                        script {
+                            if(changeset "micro-services/ecomm-product/**/*.*") {
+                                echo "Product Changed"
+                            } else {
+                                echo "Nothing changed"
+                            }
+                        }
                     }
                 }
                 stage('Unit testing') {
