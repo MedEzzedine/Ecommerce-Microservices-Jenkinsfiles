@@ -35,8 +35,7 @@ pipeline {
                     steps {
                         script {
                             for (change in currentBuild.changeSets) {
-                                echo "${change}"
-                                for (path in change.paths) {
+                                for (path in change.getPaths()) {
                                     echo "${path}"
                                 }
                             }
