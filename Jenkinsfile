@@ -53,7 +53,7 @@ pipeline {
 
                 stage('Finding Git secrets') {
                     steps {
-                        sh "docker run trufflesecurity/trufflehog github --repo=${GITHUB_REPO} --json . > trufflehog.json"
+                        sh "docker run trufflesecurity/trufflehog github --repo=${GITHUB_REPO} --json > trufflehog.json"
                         sh '''
                             cat trufflehog.json | grep -oE "\\"stringsFound\\"\\:.[.\\"]}"|sed -e "s/,\\".]//" -e "s/}//"|sed "s/\\"stringsFound\\"://"|grep -o "\\".\\""|awk -F "," '{ for(i=1;i<=NF;i++) print $i}' > formatted_output.txt
                             '''
