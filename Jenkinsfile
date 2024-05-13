@@ -54,14 +54,14 @@ pipeline {
                 stage('Finding Git secrets') {
                     steps {
                         sh "docker run trufflesecurity/trufflehog github --repo=${GITHUB_REPO} --json > trufflehog.json"
-                        sh '''
-                            cat trufflehog.json | grep -oE "\\"stringsFound\\"\\:.[.\\"]}"|sed -e "s/,\\".]//" -e "s/}//"|sed "s/\\"stringsFound\\"://"|grep -o "\\".\\""|awk -F "," '{ for(i=1;i<=NF;i++) print $i}' > formatted_output.txt
-                            '''
-                        sh 'rm trufflehog.json'
-                        sh "cat formatted_output.txt"
+                        // sh '''
+                        //     cat trufflehog.json | grep -oE "\\"stringsFound\\"\\:.[.\\"]}"|sed -e "s/,\\".]//" -e "s/}//"|sed "s/\\"stringsFound\\"://"|grep -o "\\".\\""|awk -F "," '{ for(i=1;i<=NF;i++) print $i}' > formatted_output.txt
+                        //     '''
+                        // sh 'rm trufflehog.json'
+                        // sh "cat formatted_output.txt"
 
                         script {
-                            def jsonReport = readFile('formatted_output.txt')
+                            def jsonReport = readFile('trufflehog.json')
                             
                             def htmlReport = """
                             <html>
@@ -109,7 +109,7 @@ pipeline {
                                     if(changes.contains(microservice)) {
                                         dir("micro-services/${microservice}") {
                                             echo "Static analysis of microservice: ${microservice}"
-                                            sh  "${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=${microservice} -Dsonar.keyName=${microservice} -Dsonar.java.binaries=."
+                                            sh  "${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=${microservice} -Dsonar.projectKey=${microservice} -Dsonar.java.binaries=."
                                         }
                                     }
                                 }
