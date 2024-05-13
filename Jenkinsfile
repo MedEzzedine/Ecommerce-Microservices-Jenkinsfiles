@@ -1,13 +1,14 @@
+def microservices = ['ecomm-cart', 'ecomm-product', 'ecomm-order', 'ecomm-user']
+
 pipeline {
     agent none
 
-// tools {
-//     maven 'Maven3'
-//     jdk 'Java17'
-// }
-
     options {
         skipDefaultCheckout()
+    }
+
+    environment {
+        GITHUB_REPO = 'https://github.com/MedEzzedine/Ecommerce-Microservices.git'
     }
 
     stages {
@@ -27,27 +28,68 @@ pipeline {
 
                 stage('Git checkout') {
                         steps {
-                            checkout changelog: false, poll: false, scm: scmGit(branches: [[name: env.CHANGE_BRANCH]], extensions: [], userRemoteConfigs: [[credentialsId: 'github_credentials', url: 'https://github.com/MedEzzedine/Ecommerce-Microservices']])
+                            checkout changelog: false, poll: false, scm: scmGit(branches: [[name: env.CHANGE_BRANCH]], extensions: [], userRemoteConfigs: [[credentialsId: 'github_credentials', url: GITHUB_REPO]])
                         }
                     }
                     
                 stage('Compile') {
                     steps {
                         script {
-                            echo "${getPRChangeLog(env.CHANGE_TARGET)}"
+                            def changes = getPRChangeLog(env.CHANGE_TARGET)
+                            for(def microservice in microservices) {
+                                if(changes.contains(microservice)) {
+                                    dir("micro-services/${microservice}") {
+                                        echo "Compiling microservice: ${microservice}"
+                                        sh "mvn clean compile"
+                                    }
+                                }
+                            }
                         }
                     }
                 }
+
+                stage('Finding Git secrets') {
+                    steps {
+                        sh "docker run trufflesecurity/trufflehog filesystem --json . > trufflehog.json"
+                        
+                        script {
+                            def jsonReport = readFile('trufflehog.json')
+                            
+                            def htmlReport = """
+                            <html>
+                            <head>
+                                <title>Trufflehog Scan Report</title>
+                            </head>
+                            <body>
+                                <h1>Trufflehog Scan Report</h1>
+                                <pre>${jsonReport}</pre>
+                            </body>
+                            </html>
+                            """
+                            
+                            writeFile file: 'scanresults/trufflehog-report.html', text: htmlReport
+                        }
+        
+                        archiveArtifacts artifacts: 'scanresults/trufflehog-report.html', allowEmptyArchive: true
+
+                        sh "docker rm \$(docker ps -a | grep trufflehog | awk '{print\$1}')"
+                    }
+                }
+
                 stage('Unit testing') {
-                    steps {
-                        echo "Unit testing"
-                    }
+                    script {
+                            def changes = getPRChangeLog(env.CHANGE_TARGET)
+                            for(def microservice in microservices) {
+                                if(changes.contains(microservice)) {
+                                    dir("micro-services/${microservice}") {
+                                        echo "Unit testing microservice: ${microservice}"
+                                        sh "mvn test"
+                                    }
+                                }
+                            }
+                        }
                 }
-                stage('Build Stage') {
-                    steps {
-                        echo "Building"
-                    }
-                }
+
                 stage('SonarQube SAST') {
                     steps {
                         echo "SonarQube SAST"
