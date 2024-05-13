@@ -36,6 +36,7 @@ pipeline {
                     steps {
                         script {
                             def changes = getPRChangeLog(env.CHANGE_TARGET)
+                            echo "${changes}"
                             for(def microservice in microservices) {
                                 if(changes.contains(microservice)) {
                                     dir("micro-services/${microservice}") {
@@ -50,7 +51,7 @@ pipeline {
 
                 stage('Finding Git secrets') {
                     steps {
-                        sh "docker run trufflesecurity/trufflehog filesystem --json . > trufflehog.json"
+                        sh "sudo docker run trufflesecurity/trufflehog filesystem --json . > trufflehog.json"
                         
                         script {
                             def jsonReport = readFile('trufflehog.json')
@@ -72,7 +73,7 @@ pipeline {
         
                         archiveArtifacts artifacts: 'scanresults/trufflehog-report.html', allowEmptyArchive: true
 
-                        sh "docker rm \$(docker ps -a | grep trufflehog | awk '{print\$1}')"
+                        sh "sudo docker rm \$(docker ps -a | grep trufflehog | awk '{print\$1}')"
                     }
                 }
 
@@ -106,7 +107,7 @@ pipeline {
         }
 
         
-        
+
         stage('Frontend Feature PR to dev') {
             when {
                 changeRequest target: 'dev/*', comparator: "GLOB"
