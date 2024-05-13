@@ -11,6 +11,7 @@ pipeline {
     }
 
     environment {
+        SCANNER_HOME = tool 'sonar-scanner'
         GITHUB_REPO = 'https://github.com/MedEzzedine/Ecommerce-Microservices.git'
     }
 
@@ -39,11 +40,8 @@ pipeline {
                     steps {
                         script {
                             def changes = getPRChangeLog(env.CHANGE_TARGET)
-                            echo "${changes}"
                             for(def microservice in microservices) {
-                                echo "test1"
                                 if(changes.contains(microservice)) {
-                                    echo "test2"
                                     dir("micro-services/${microservice}") {
                                         echo "Compiling microservice: ${microservice}"
                                         sh "mvn clean compile"
@@ -98,16 +96,26 @@ pipeline {
                     }
                 }
 
-                stage('SonarQube SAST') {
+                stage('SonarQube Analysis') {
                     steps {
-                        echo "SonarQube SAST"
+                        withSonarQubeEnv('sonar') {
+                            script {
+                                def changes = getPRChangeLog(env.CHANGE_TARGET)
+                                for(def microservice in microservices) {
+                                    if(changes.contains(microservice)) {
+                                        dir("micro-services/${microservice}") {
+                                            echo "Static analysis of microservice: ${microservice}"
+                                            sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=$microservice \
+                                                    -Dsonar.projectName=$microservice -Dsonar.java.binaries=. '''
+                                            
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-                stage('Quality Gates') {
-                    steps {
-                        echo "Quality "
-                    }
-                }
+
             }
         }
 
