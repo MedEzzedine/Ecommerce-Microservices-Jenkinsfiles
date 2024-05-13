@@ -58,6 +58,7 @@ pipeline {
                             cat trufflehog.json | grep -oE "\\"stringsFound\\"\\:.[.\\"]}"|sed -e "s/,\\".]//" -e "s/}//"|sed "s/\\"stringsFound\\"://"|grep -o "\\".\\""|awk -F "," '{ for(i=1;i<=NF;i++) print $i}' > formatted_output.txt
                             '''
                         sh 'rm trufflehog.json'
+                        sh "cat formatted_output.txt"
 
                         script {
                             def jsonReport = readFile('formatted_output.txt')
@@ -108,7 +109,7 @@ pipeline {
                                     if(changes.contains(microservice)) {
                                         dir("micro-services/${microservice}") {
                                             echo "Static analysis of microservice: ${microservice}"
-                                            sh  "${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=${microservice} -Dsonar.projectName=${microservice} -Dsonar.java.binaries=."
+                                            sh  "${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=${microservice} -Dsonar.keyName=${microservice} -Dsonar.java.binaries=."
                                         }
                                     }
                                 }
