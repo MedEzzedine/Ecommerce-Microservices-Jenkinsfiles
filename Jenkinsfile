@@ -60,7 +60,7 @@ pipeline {
                         sh 'rm trufflehog.json'
 
                         script {
-                            def jsonReport = readFile('output.txt')
+                            def jsonReport = readFile('formatted_output.txt')
                             
                             def htmlReport = """
                             <html>
