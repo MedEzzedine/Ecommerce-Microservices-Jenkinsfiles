@@ -3,9 +3,6 @@ def microservices = ['ecomm-cart', 'ecomm-product', 'ecomm-order', 'ecomm-user']
 pipeline {
     agent none
 
-    tools {
-        maven "maven3"
-    }
     options {
         skipDefaultCheckout()
     }
@@ -27,6 +24,10 @@ pipeline {
             }
 
             agent any
+
+            tools {
+                maven "maven3"
+            }
 
             stages {
 
