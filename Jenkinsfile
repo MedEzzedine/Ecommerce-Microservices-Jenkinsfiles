@@ -152,5 +152,5 @@ def getPRChangeLog(target) {
     return sh(
             script: "git --no-pager diff origin/${target} --name-only",
             returnStdout: true
-    ).split('\n')
+    )//.split('\n')
 }
