@@ -77,7 +77,8 @@ pipeline {
                 }
 
                 stage('Unit testing') {
-                    script {
+                    steps {
+                        script {
                             def changes = getPRChangeLog(env.CHANGE_TARGET)
                             for(def microservice in microservices) {
                                 if(changes.contains(microservice)) {
@@ -88,6 +89,7 @@ pipeline {
                                 }
                             }
                         }
+                    }
                 }
 
                 stage('SonarQube SAST') {
@@ -104,7 +106,7 @@ pipeline {
         }
 
         
-
+        
         stage('Frontend Feature PR to dev') {
             when {
                 changeRequest target: 'dev/*', comparator: "GLOB"
