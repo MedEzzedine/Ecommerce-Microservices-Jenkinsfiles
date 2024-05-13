@@ -1,7 +1,11 @@
 def microservices = ['ecomm-cart', 'ecomm-product', 'ecomm-order', 'ecomm-user']
 
 pipeline {
-    agent none
+    agent any
+
+    tools {
+        maven "maven3"
+    }
 
     options {
         skipDefaultCheckout()
@@ -21,12 +25,6 @@ pipeline {
                 not { changeRequest branch: 'feature/frontend*', comparator: "GLOB" }
                 beforeAgent true
                 beforeOptions true
-            }
-
-            agent any
-
-            tools {
-                maven "maven3"
             }
 
             stages {
@@ -129,8 +127,6 @@ pipeline {
                 beforeAgent true
                 beforeOptions true
             }
-
-            agent any
 
             stages {
 
