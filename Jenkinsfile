@@ -53,7 +53,7 @@ pipeline {
 
                 stage('Finding Git secrets') {
                     steps {
-                        sh "docker run trufflesecurity/trufflehog filesystem --json . > trufflehog.json"
+                        sh "docker run trufflesecurity/trufflehog github repo=${GITHUB_REPO} --json . > trufflehog.json"
                         
                         script {
                             def jsonReport = readFile('trufflehog.json')
@@ -104,9 +104,7 @@ pipeline {
                                     if(changes.contains(microservice)) {
                                         dir("micro-services/${microservice}") {
                                             echo "Static analysis of microservice: ${microservice}"
-                                            sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=$microservice \
-                                                    -Dsonar.projectName=$microservice -Dsonar.java.binaries=. '''
-                                            
+                                            sh  "${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=${microservice} -Dsonar.projectName=${microservice} -Dsonar.java.binaries=."
                                         }
                                     }
                                 }
