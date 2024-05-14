@@ -78,11 +78,11 @@ pipeline {
                             for (microservice in microservices) {
                                 // -q: quiet mode (avoid unnecessary output), --severity CRITICAL exit code will be 1 when a CRITICAL vulnerability is found
                                 // TODO: Add back --exit-code 1 for the final pipeline
-                                sh "docker run --rm aquasec/trivy -q image -f html $DOCKERHUB_USER/$microservice:$BRANCH_NAME-$BUILD_NUMBER > trivy-report-${microservice}.html"
+                                sh "docker run --rm aquasec/trivy image -f html $DOCKERHUB_USER/$microservice:$BRANCH_NAME-$BUILD_NUMBER > trivy-report-${microservice}.html"
                                 archiveArtifacts "trivy-report-${microservice}.html"
                             }
                             
-                            sh "docker run --rm aquasec/trivy -q image -f html $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER > trivy-report-ecomm-frontend.html"
+                            sh "docker run --rm aquasec/trivy image -f html $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER > trivy-report-ecomm-frontend.html"
                             archiveArtifacts "trivy-report-${microservice}.html"
                         }
                     }
