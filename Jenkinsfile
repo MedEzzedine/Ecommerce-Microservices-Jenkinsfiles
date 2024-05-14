@@ -78,11 +78,11 @@ pipeline {
                             for (def microservice in microservices) {
                                 // -q: quiet mode (avoid unnecessary output), --severity CRITICAL exit code will be 1 when a CRITICAL vulnerability is found
                                 // TODO: Add back --exit-code 1 for the final pipeline
-                                sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock $PWD:/tmp/.cache/ aquasec/trivy image $DOCKERHUB_USER/${microservice}:$BRANCH_NAME-$BUILD_NUMBER | awk '{print \"<tr><td>\" \$1 \"</td><td>\" \$2 \"</td><td>\" \$3 \"</td></tr>\"}' > trivy-report-${microservice}.html"
+                                sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $WORKSPACE:/tmp/.cache/ aquasec/trivy image $DOCKERHUB_USER/${microservice}:$BRANCH_NAME-$BUILD_NUMBER | awk '{print \"<tr><td>\" \$1 \"</td><td>\" \$2 \"</td><td>\" \$3 \"</td></tr>\"}' > trivy-report-${microservice}.html"
                                 archiveArtifacts artifacts: "trivy-report-${microservice}.html", allowEmptyArchive: true
                             }
                             
-                            sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock $PWD:/tmp/.cache/ aquasec/trivy image $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER | awk '{print \"<tr><td>\" \$1 \"</td><td>\" \$2 \"</td><td>\" \$3 \"</td></tr>\"}' > trivy-report-ecomm-frontend.html"
+                            sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $WORKSPACE:/tmp/.cache/ aquasec/trivy image $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER | awk '{print \"<tr><td>\" \$1 \"</td><td>\" \$2 \"</td><td>\" \$3 \"</td></tr>\"}' > trivy-report-ecomm-frontend.html"
                             archiveArtifacts artifacts: "trivy-report-ecomm-frontend.html", allowEmptyArchive: true
                         }
                     }
