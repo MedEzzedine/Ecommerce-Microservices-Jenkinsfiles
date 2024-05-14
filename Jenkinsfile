@@ -53,7 +53,7 @@ pipeline {
 
                 stage('Finding Git secrets') {
                     steps {
-                        sh "docker run trufflesecurity/trufflehog github --repo=${GITHUB_REPO} --json | tee trufflehog.json"
+                        sh "docker run --rm trufflesecurity/trufflehog github --repo=${GITHUB_REPO} --json | tee trufflehog.json"
 
                         script {
                             def jsonReport = readFile('trufflehog.json')
@@ -74,8 +74,6 @@ pipeline {
                         }
         
                         archiveArtifacts artifacts: 'scanresults/trufflehog-report.html', allowEmptyArchive: true
-
-                        sh "docker rm \$(docker ps -a | grep trufflehog | awk '{print\$1}')"
                     }
                 }
 
