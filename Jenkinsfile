@@ -63,7 +63,10 @@ pipeline {
                                     sh "docker build -t $DOCKERHUB_USER/$microservice:$BRANCH_NAME-$BUILD_NUMBER ."
                                 }
                             }
-                            sh "docker build -t $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER -f Dockerfile.local ./frontend"
+                            // TODO: Add arguments when building frontend image
+                            dir('frontend') {
+                                sh "docker build -t $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER -f Dockerfile.local ."
+                            }
                         }
                     }
                 }
