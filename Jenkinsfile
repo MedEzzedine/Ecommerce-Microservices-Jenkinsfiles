@@ -53,7 +53,7 @@ pipeline {
 
                 stage('Finding Git secrets') {
                     steps {
-                        sh "docker run --rm trufflesecurity/trufflehog github --repo=${GITHUB_REPO} --json | tee trufflehog.json"
+                        sh "docker run -it --rm trufflesecurity/trufflehog github --repo=${GITHUB_REPO} --json > trufflehog.json"
 
                         script {
                             def jsonReport = readFile('trufflehog.json')
