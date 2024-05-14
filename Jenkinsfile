@@ -65,7 +65,8 @@ pipeline {
                             }
                             // TODO: Add arguments when building frontend image
                             dir('frontend') {
-                                sh "docker build -t $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER -f Dockerfile.local ."
+                                // "--network=host" to avoid DNS problem while running npm ci
+                                sh "docker build -t $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER -f Dockerfile.local --network=host ."
                             }
                         }
                     }
