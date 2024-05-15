@@ -94,7 +94,8 @@ pipeline {
                 }
 
                 stage('OWASP Dependency Check') {
-                    script {
+                    steps {
+                        script {
                             def changes = getPRChangeLog(env.CHANGE_TARGET)
                             for(def microservice in microservices) {
                                 if(changes.contains(microservice)) {
@@ -111,6 +112,7 @@ pipeline {
                                 }
                             }
                         }
+                    }
                 }
 
                 stage('SonarQube Analysis') {
