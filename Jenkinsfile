@@ -51,7 +51,7 @@ pipeline {
                     }
                 }
 
-                stage('Finding Git secrets') {
+                stage('Finding Git secrets with Trufflehog') {
                     steps {
                         sh "docker run -it --rm trufflesecurity/trufflehog github --repo=${GITHUB_REPO} --json > trufflehog.json"
 
@@ -77,7 +77,7 @@ pipeline {
                     }
                 }
 
-                stage('Unit testing') {
+                stage('Unit testing with JUnit') {
                     steps {
                         script {
                             def changes = getPRChangeLog(env.CHANGE_TARGET)
@@ -110,7 +110,6 @@ pipeline {
                         }
                     }
                 }
-
             }
         }
 
