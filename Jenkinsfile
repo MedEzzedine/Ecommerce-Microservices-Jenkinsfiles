@@ -16,6 +16,9 @@ pipeline {
         GITHUB_REPO = 'https://github.com/MedEzzedine/Ecommerce-Microservices.git'
         DOCKERHUB_CREDENTIALS_ID = 'docker_credentials'
         DOCKERHUB_USER = 'medez'
+        K8S_MASTER_HOST = '54.227.64.47' // To be changed with a fixed url
+        K8S_MASTER_SSH_CREDENTIALS_ID = 'k8s-master-ssh'
+        K8S_MASTER_SSH_USER = 'ubuntu'
     }
 
     stages {
@@ -106,7 +109,13 @@ pipeline {
 
                 stage('Kubectl apply new deployment') {
                     steps {
-                        echo "Kubectl apply new deployment"
+                        sshagent(credentials: [K8S_MASTER_SSH_CREDENTIALS_ID]) {
+                            sh '''
+                                [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
+                                ssh-keyscan -t rsa,dsa ${K8S_MASTER_HOST} >> ~/.ssh/known_hosts
+                                ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "sudo kubectl get nodes"
+                            '''
+                        }
                     }
                 }
 
