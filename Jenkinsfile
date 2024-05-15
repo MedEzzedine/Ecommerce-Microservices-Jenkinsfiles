@@ -113,6 +113,8 @@ pipeline {
                             sh '''
                                 [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
                                 ssh-keyscan -t rsa,dsa ${K8S_MASTER_HOST} >> ~/.ssh/known_hosts
+                                ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "sudo systemctl restart kubelet"
+                                ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "sleep 8"
                                 ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "sudo kubectl get nodes"
                             '''
                         }
