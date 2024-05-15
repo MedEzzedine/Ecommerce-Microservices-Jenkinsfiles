@@ -93,6 +93,26 @@ pipeline {
                     }
                 }
 
+                stage('OWASP Dependency Check') {
+                    script {
+                            def changes = getPRChangeLog(env.CHANGE_TARGET)
+                            for(def microservice in microservices) {
+                                if(changes.contains(microservice)) {
+                                    dir("micro-services/${microservice}") {
+                                        echo "Dependency check on microservice: ${microservice}"
+                                                dependencyCheck additionalArguments: ''' 
+                                                -o './'
+                                                -s './'
+                                                -f 'ALL' 
+                                                --prettyPrint''', odcInstallation: 'owasp-dc'
+                                    
+                                        dependencyCheckPublisher pattern: "owasp-dc-report-${microservice}.html"
+                                    }
+                                }
+                            }
+                        }
+                }
+
                 stage('SonarQube Analysis') {
                     steps {
                         withSonarQubeEnv('sonar') {
