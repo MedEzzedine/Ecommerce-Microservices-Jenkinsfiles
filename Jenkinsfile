@@ -136,8 +136,6 @@ pipeline {
             }
         }
 
-        
-
         stage('Frontend Feature PR to dev') {
             when {
                 changeRequest target: 'dev/*', comparator: "GLOB"
