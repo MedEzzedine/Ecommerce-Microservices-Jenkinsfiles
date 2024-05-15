@@ -104,10 +104,11 @@ pipeline {
                                                 dependencyCheck additionalArguments: ''' 
                                                 -o './'
                                                 -s './'
-                                                -f 'ALL' 
+                                                -f 'HTML' 
+                                                --project '${microservice}
                                                 --prettyPrint''', odcInstallation: 'owasp-dc'
                                     
-                                        dependencyCheckPublisher pattern: "owasp-dc-report-${microservice}.html"
+                                        dependencyCheckPublisher pattern: "dependency-check-report.html"
                                     }
                                 }
                             }
