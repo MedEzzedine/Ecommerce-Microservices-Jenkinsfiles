@@ -101,12 +101,13 @@ pipeline {
                                 if(changes.contains(microservice)) {
                                     dir("micro-services/${microservice}") {
                                         echo "Dependency check on microservice: ${microservice}"
-                                                dependencyCheck additionalArguments: '''
-                                                -f 'HTML' 
-                                                --project '${microservice}
-                                                --prettyPrint''', odcInstallation: 'owasp-dc'
+
+                                        dependencyCheck additionalArguments: '''
+                                        -f 'HTML' 
+                                        --project '${microservice}'
+                                        --prettyPrint''', odcInstallation: 'owasp-dc'
                                     
-                                        dependencyCheckPublisher pattern: "dependency-check-report.html"
+                                        archiveArtifacts artifacts: "dependency-check-report.html"
                                     }
                                 }
                             }
