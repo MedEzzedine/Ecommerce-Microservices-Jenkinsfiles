@@ -53,9 +53,16 @@ pipeline {
 
                 stage('Finding Git secrets with Trufflehog') {
                     steps {
-                        sh "echo \$(docker run -i --rm trufflesecurity/trufflehog github --repo=${GITHUB_REPO} --json) > trufflehog.json"
-
                         script {
+
+                            sh "docker run -i --rm trufflesecurity/trufflehog github --repo=${GITHUB_REPO} --json) > trufflehog.json"
+
+                            echo "printing."
+                            echo "printing.."
+                            echo "printing..."
+
+                            sh "cat trufflehog.json"
+
                             def jsonReport = readFile('trufflehog.json')
                             
                             def htmlReport = """
