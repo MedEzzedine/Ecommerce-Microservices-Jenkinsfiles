@@ -57,12 +57,6 @@ pipeline {
 
                             sh "docker run -i --rm trufflesecurity/trufflehog github --repo=${GITHUB_REPO} --json > trufflehog.json 2>&1"
 
-                            echo "printing."
-                            echo "printing.."
-                            echo "printing..."
-
-                            sh "cat trufflehog.json"
-
                             def jsonReport = readFile('trufflehog.json')
                             
                             def htmlReport = """
