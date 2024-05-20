@@ -53,7 +53,7 @@ pipeline {
 
                 stage('Finding Git secrets with Trufflehog') {
                     steps {
-                        sh "docker run --rm trufflesecurity/trufflehog github --repo=${GITHUB_REPO} --json > trufflehog.json"
+                        sh "docker run -i --rm trufflesecurity/trufflehog github --repo=${GITHUB_REPO} --json > trufflehog.json"
 
                         script {
                             def jsonReport = readFile('trufflehog.json')
@@ -101,9 +101,7 @@ pipeline {
                                 if(changes.contains(microservice)) {
                                     dir("micro-services/${microservice}") {
                                         echo "Dependency check on microservice: ${microservice}"
-                                                dependencyCheck additionalArguments: ''' 
-                                                -o './'
-                                                -s './'
+                                                dependencyCheck additionalArguments: '''
                                                 -f 'HTML' 
                                                 --project '${microservice}
                                                 --prettyPrint''', odcInstallation: 'owasp-dc'
