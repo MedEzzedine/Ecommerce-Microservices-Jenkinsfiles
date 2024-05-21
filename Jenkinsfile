@@ -119,18 +119,18 @@ pipeline {
 
                                     scp -r manifests ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/manifests
 
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f infrastructure/configMap.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f infrastructure/postgres.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f infrastructure/redis.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f infrastructure/volume.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/infrastructure/configMap.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/infrastructure/postgres.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/infrastructure/redis.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/infrastructure/volume.yml"
                                     sleep 45
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f infrastructure/elasticsearch.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/infrastructure/elasticsearch.yml"
                                     sleep 5
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f micro-services/cart.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f micro-services/product.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f micro-services/order.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f micro-services/user.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f micro-services/frontend.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/micro-services/cart.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/micro-services/product.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/micro-services/order.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/micro-services/user.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/micro-services/frontend.yml"
                                 '''
                             }
                         }
