@@ -64,12 +64,14 @@ pipeline {
                             for(def microservice in microservices) {
                                 dir("micro-services/${microservice}") {
                                     sh "docker build -t $DOCKERHUB_USER/$microservice:$BRANCH_NAME-$BUILD_NUMBER ."
+                                    sh "docker tag $DOCKERHUB_USER/$microservice:$BRANCH_NAME-$BUILD_NUMBER $DOCKERHUB_USER/$microservice:latest"
                                 }
                             }
                             // TODO: Add arguments when building frontend image
                             dir('frontend') {
                                 // "--network=host" to avoid DNS problem while running npm ci
                                 sh "docker build -t $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER -f Dockerfile.local --network=host ."
+                                sh "docker tag $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER $DOCKERHUB_USER/ecomm-frontend:latest"
                             }
                         }
                     }
@@ -84,7 +86,7 @@ pipeline {
                             for (def microservice in microservices) {
                                 // -q: quiet mode (avoid unnecessary output), --severity CRITICAL exit code will be 1 when a CRITICAL vulnerability is found
                                 // TODO: Add back --exit-code 1 for the final pipeline
-                                sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:/root/.cache/ -v $PWD/html.tpl:/tmp/html.tpl aquasec/trivy image --scanners vuln --format template --template '@/tmp/html.tpl' $DOCKERHUB_USER/${microservice}:$BRANCH_NAME-$BUILD_NUMBER > trivy-report-${microservice}.html"
+                                sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:/root/.cache/ -v $PWD:/tmp/.cache -v $PWD/html.tpl:/tmp/html.tpl aquasec/trivy image --scanners vuln --format template --template '@/tmp/html.tpl' $DOCKERHUB_USER/${microservice}:$BRANCH_NAME-$BUILD_NUMBER > trivy-report-${microservice}.html"
                                 archiveArtifacts artifacts: "trivy-report-${microservice}.html", allowEmptyArchive: true
                             }
                             
@@ -101,13 +103,15 @@ pipeline {
                         script {
                             for (microservice in microservices) {
                                 sh "docker push $DOCKERHUB_USER/$microservice:$BRANCH_NAME-$BUILD_NUMBER"
+                                sh "docker push $DOCKERHUB_USER/$microservice:latest"
                             }
                             sh "docker push $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER"
+                            sh "docker push $DOCKERHUB_USER/ecomm-frontend:latest"
                         }
                     }
                 }
 
-                stage('Kubectl apply new deployment') {
+                stage('minikube kubectl -- apply -n test new deployment') {
                     steps {
                         sshagent(credentials: [K8S_MASTER_SSH_CREDENTIALS_ID]) {
                             script {
@@ -119,18 +123,18 @@ pipeline {
 
                                     scp -r manifests ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/manifests
 
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/infrastructure/configMap.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/infrastructure/postgres.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/infrastructure/redis.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/infrastructure/volume.yml"
-                                    sleep 45
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/infrastructure/elasticsearch.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/configMap.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/postgres.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/redis.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/volume.yml"
+                                    sleep 60
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/elasticsearch.yml"
                                     sleep 5
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/micro-services/cart.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/micro-services/product.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/micro-services/order.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/micro-services/user.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f manifests/test-env/micro-services/frontend.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/cart.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/product.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/order.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/user.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/frontend.yml"
                                 '''
                             }
                         }
