@@ -110,12 +110,29 @@ pipeline {
                 stage('Kubectl apply new deployment') {
                     steps {
                         sshagent(credentials: [K8S_MASTER_SSH_CREDENTIALS_ID]) {
-                            sh '''
-                                [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
-                                ssh-keyscan -t rsa,dsa ${K8S_MASTER_HOST} >> ~/.ssh/known_hosts
+                            dir("manifests/test-env") {
+                                script {
+                                    sh '''
+                                        [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
+                                        ssh-keyscan -t rsa,dsa ${K8S_MASTER_HOST} >> ~/.ssh/known_hosts
 
-                                ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "sudo kubectl get nodes"
-                            '''
+                                        ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl get nodes"
+
+                                        ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f infrastructure/configMap.yml"
+                                        ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f infrastructure/postgres.yml"
+                                        ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f infrastructure/redis.yml"
+                                        ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f infrastructure/volume.yml"
+                                        sleep 45
+                                        ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f infrastructure/elasticsearch.yml"
+                                        sleep 5
+                                        ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f micro-services/cart.yml"
+                                        ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f micro-services/product.yml"
+                                        ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f micro-services/order.yml"
+                                        ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f micro-services/user.yml"
+                                        ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl apply -f micro-services/frontend.yml"
+                                    '''
+                                }
+                            }
                         }
                     }
                 }
