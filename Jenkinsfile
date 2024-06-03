@@ -110,6 +110,21 @@ pipeline {
                         }
                     }
                 }
+                                    // scp -r manifests ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/manifests
+
+                                    // ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} << EOF
+                                    // "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/configMap.yml"
+                                    // ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/postgres.yml"
+                                    // ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/redis.yml"
+                                    // ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/volume.yml"
+                                    // sleep 60
+                                    // ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/elasticsearch.yml"
+                                    // sleep 5
+                                    // ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/cart.yml"
+                                    // ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/product.yml"
+                                    // ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/order.yml"
+                                    // ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/user.yml"
+                                    // ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/frontend.yml"
 
                 stage('minikube kubectl -- apply -n test new deployment') {
                     steps {
@@ -119,22 +134,11 @@ pipeline {
                                     [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
                                     ssh-keyscan -t rsa,dsa ${K8S_MASTER_HOST} >> ~/.ssh/known_hosts
 
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "kubectl get nodes"
+                                    scp -rf manifests ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/manifests
+                                    scp -rf scripts/deploy-manifests-test.sh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/scripts
 
-                                    scp -r manifests ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/manifests
-
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/configMap.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/postgres.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/redis.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/volume.yml"
-                                    sleep 60
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/infrastructure/elasticsearch.yml"
-                                    sleep 5
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/cart.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/product.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/order.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/user.yml"
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/frontend.yml"
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} kubectl get nodes
+                                    
                                 '''
                             }
                         }
