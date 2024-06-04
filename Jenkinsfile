@@ -5,6 +5,7 @@ pipeline {
 
     tools {
         maven "maven3"
+        nodejs "Node20"
     }
 
     options {
@@ -149,20 +150,80 @@ pipeline {
                             checkout changelog: false, poll: false, scm: scmGit(branches: [[name: env.CHANGE_BRANCH]], extensions: [], userRemoteConfigs: [[credentialsId: 'github_credentials', url: 'https://github.com/MedEzzedine/Ecommerce-Microservices']])
                         }
                     }
-                    
-                stage('Compile') {
+                
+                stage('Finding Git secrets with Trufflehog') {
                     steps {
-                        echo "Compile"
+                        script {
+
+                            sh "docker run -i --rm trufflesecurity/trufflehog github --repo=${GITHUB_REPO} --json > trufflehog.json 2>&1"
+
+                            def jsonReport = readFile('trufflehog.json')
+                            
+                            def htmlReport = """
+                            <html>
+                            <head>
+                                <title>Trufflehog Scan Report</title>
+                            </head>
+                            <body>
+                                <h1>Trufflehog Scan Report</h1>
+                                <pre>${jsonReport}</pre>
+                            </body>
+                            </html>
+                            """
+                            
+                            writeFile file: 'scanresults/trufflehog-report.html', text: htmlReport
+                        }
+        
+                        archiveArtifacts artifacts: 'scanresults/trufflehog-report.html', allowEmptyArchive: true
                     }
                 }
-                stage('Unit testing') {
+
+                stage('Install NPM Dependencies') {
                     steps {
-                        echo "Unit testing"
+                        script {
+                            dir("frontend") {
+                                echo "Installing dependencies..."
+                                sh "npm ci"
+                            }
+                        }
                     }
                 }
-                stage('Build Stage') {
+
+                stage('Testing with Jest') {
                     steps {
-                        echo "Building"
+                        script {
+                            dir("frontend") {
+                                echo "Jest testing..."
+                                //sh "npm run test"
+                            }
+                        }
+                    }
+                }
+
+                stage('OWASP Dependency Check') {
+                    steps {
+                        script {
+                            dir("frontend") {
+                                echo "Dependency check on frontend..."
+
+                                dependencyCheck additionalArguments: "-s . -f 'HTML' --project frontend", odcInstallation: 'owasp-dc'
+                            
+                                archiveArtifacts artifacts: "dependency-check-report.html"
+                            }
+                        }
+                    }
+                }
+
+                stage('SonarQube Analysis') {
+                    steps {
+                        withSonarQubeEnv('sonar') {
+                            script {
+                                dir("frontend") {
+                                    echo "Static analysis of frontend..."
+                                    sh  "${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=${microservice} -Dsonar.projectKey=${microservice} -Dsonar.java.binaries=."
+                                }
+                            }
+                        }
                     }
                 }
             }
