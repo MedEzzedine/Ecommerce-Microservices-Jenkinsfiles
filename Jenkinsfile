@@ -64,12 +64,12 @@ pipeline {
                         dir("frontend") {
                             sh "npm ci"
 
-                            sh "echo 'REACT_APP_SERVER_BASE_URL=http://ingress:8091' > .env"
+                            sh "echo 'REACT_APP_SERVER_BASE_URL=http://gateway:8091' > .env"
                             sh "echo 'REACT_APP_WS_BASE_URL=ws://frontend:80' >> .env"
                             sh "echo 'NODE_ENV=production' >> .env"
                             sh "echo 'REACT_APP_SERVER_BASE_URL=http://frontend:80' >> .env"
 
-                            sh "npm run build"
+                            sh "CI=false npm run build"
                         }
                     }
                 }
@@ -117,7 +117,7 @@ pipeline {
                 stage('Push to Dockerhub') {
                     steps {
                         script {
-                            for (microservice in microservices) {
+                            for (def microservice in microservices) {
                                 sh "docker push $DOCKERHUB_USER/$microservice:$BRANCH_NAME-$BUILD_NUMBER"
                                 sh "docker push $DOCKERHUB_USER/$microservice:latest"
                             }
