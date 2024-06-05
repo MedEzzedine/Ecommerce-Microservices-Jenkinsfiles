@@ -5,6 +5,7 @@ pipeline {
 
     tools {
         maven "maven3"
+        nodejs "Node20"
     }
 
     options {
@@ -58,6 +59,21 @@ pipeline {
                     }
                 }
 
+                stage('Build frontend') {
+                    steps {
+                        dir("frontend") {
+                            sh "npm ci"
+
+                            sh "echo 'REACT_APP_SERVER_BASE_URL=http://ingress:8091' > .env"
+                            sh "echo 'REACT_APP_WS_BASE_URL=ws://frontend:80' >> .env"
+                            sh "echo 'NODE_ENV=production' >> .env"
+                            sh "echo 'REACT_APP_SERVER_BASE_URL=http://frontend:80' >> .env"
+
+                            sh "npm run build"
+                        }
+                    }
+                }
+
                 stage('Build Docker images') {
                     steps {
                         script {
@@ -70,7 +86,7 @@ pipeline {
                             // TODO: Add arguments when building frontend image
                             dir('frontend') {
                                 // "--network=host" to avoid DNS problem while running npm ci
-                                sh "docker build -t $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER -f Dockerfile.local --network=host ."
+                                sh "docker build -t $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER --network=host ."
                                 sh "docker tag $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER $DOCKERHUB_USER/ecomm-frontend:latest"
                             }
                         }
@@ -126,7 +142,7 @@ pipeline {
                                     // ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/user.yml"
                                     // ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} "minikube kubectl -- apply -n test -f manifests/test-env/micro-services/frontend.yml"
 
-                stage('minikube kubectl -- apply -n test new deployment') {
+                stage('Deploy to K8s test env') {
                     steps {
                         sshagent(credentials: [K8S_MASTER_SSH_CREDENTIALS_ID]) {
                             script {
@@ -134,11 +150,12 @@ pipeline {
                                     [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
                                     ssh-keyscan -t rsa,dsa ${K8S_MASTER_HOST} >> ~/.ssh/known_hosts
 
-                                    scp -rf manifests ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/manifests
-                                    scp -rf scripts/deploy-manifests-test.sh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/scripts
+                                    scp -r manifests/test-env ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/manifests/test-env
+                                    scp scripts/deploy-manifests-test.sh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/scripts/deploy-manifests-test.sh
 
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} kubectl get nodes
-                                    
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} chmod +x scripts/deploy-manifests-test.sh
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} sh scripts/deploy-manifests-test.sh
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} kubectl get all -n test
                                 '''
                             }
                         }
@@ -162,9 +179,13 @@ pipeline {
             }
         }
         
-        // failure {
-        //     slackSend color: "danger", message: "Backend pipeline failed."
-        // }
+        success {
+            slackSend color: "good", message: "¨Pipeline $BRANCH_NAME-$BUILD_NUMBER succeeded."
+        }
+
+        failure {
+             slackSend color: "danger", message: "Pipeline $BRANCH_NAME-$BUILD_NUMBER failed."
+        }
     }
 }
 
