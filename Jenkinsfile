@@ -220,7 +220,7 @@ pipeline {
                             script {
                                 dir("frontend") {
                                     echo "Static analysis of frontend..."
-                                    sh  "${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=${microservice} -Dsonar.projectKey=${microservice} -Dsonar.java.binaries=."
+                                    sh  "${SCANNER_HOME}/bin/sonar-scanner"
                                 }
                             }
                         }
