@@ -220,7 +220,7 @@ pipeline {
                             script {
                                 dir("frontend") {
                                     echo "Static analysis of frontend..."
-                                    sh  "${SCANNER_HOME}/bin/sonar-scanner"
+                                    sh "${SCANNER_HOME}/bin/sonar-scanner"
                                 }
                             }
                         }
