@@ -82,19 +82,19 @@ pipeline {
                         script {
                             for(def microservice in microservices) {
                                 dir("micro-services/${microservice}") {
-                                    sh "docker build -t $DOCKERHUB_USER/$microservice:$BRANCH_NAME-$BUILD_NUMBER ."
-                                    sh "docker tag $DOCKERHUB_USER/$microservice:$BRANCH_NAME-$BUILD_NUMBER $DOCKERHUB_USER/$microservice:latest"
+                                    sh "docker build -t $DOCKERHUB_USER/$microservice:$BRANCH_NAME--$BUILD_NUMBER ."
+                                    sh "docker tag $DOCKERHUB_USER/$microservice:$BRANCH_NAME--$BUILD_NUMBER $DOCKERHUB_USER/$microservice:latest"
                                 }
                             }
                             dir("edge-services/ecomm-gateway") {
-                                sh "docker build -t $DOCKERHUB_USER/ecomm-gateway:$BRANCH_NAME-$BUILD_NUMBER ."
-                                sh "docker tag $DOCKERHUB_USER/ecomm-gateway:$BRANCH_NAME-$BUILD_NUMBER $DOCKERHUB_USER/ecomm-gateway:latest"
+                                sh "docker build -t $DOCKERHUB_USER/ecomm-gateway:$BRANCH_NAME--$BUILD_NUMBER ."
+                                sh "docker tag $DOCKERHUB_USER/ecomm-gateway:$BRANCH_NAME--$BUILD_NUMBER $DOCKERHUB_USER/ecomm-gateway:latest"
                             }
 
                             dir('frontend') {
                                 // "--network=host" to avoid DNS problem while running npm ci
-                                sh "docker build -t $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER --network=host ."
-                                sh "docker tag $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER $DOCKERHUB_USER/ecomm-frontend:latest"
+                                sh "docker build -t $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME--$BUILD_NUMBER --network=host ."
+                                sh "docker tag $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME--$BUILD_NUMBER $DOCKERHUB_USER/ecomm-frontend:latest"
                             }
                         }
                     }
@@ -125,16 +125,16 @@ pipeline {
                     steps {
                         script {
                             for (def microservice in microservices) {
-                                sh "docker push $DOCKERHUB_USER/$microservice:$BRANCH_NAME-$BUILD_NUMBER"
+                                sh "docker push $DOCKERHUB_USER/$microservice:$BRANCH_NAME--$BUILD_NUMBER"
                                 sh "docker push $DOCKERHUB_USER/$microservice:latest"
                             }
 
                             // Pushing frontend
-                            sh "docker push $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-$BUILD_NUMBER"
+                            sh "docker push $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME--$BUILD_NUMBER"
                             sh "docker push $DOCKERHUB_USER/ecomm-frontend:latest"
 
                             // Pushing gateway
-                            sh "docker push $DOCKERHUB_USER/ecomm-gateway:$BRANCH_NAME-$BUILD_NUMBER"
+                            sh "docker push $DOCKERHUB_USER/ecomm-gateway:$BRANCH_NAME--$BUILD_NUMBER"
                             sh "docker push $DOCKERHUB_USER/ecomm-gateway:latest"
                         }   
                     }
