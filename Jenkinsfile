@@ -162,8 +162,8 @@ pipeline {
                         sshagent(credentials: [K8S_MASTER_SSH_CREDENTIALS_ID]) {
                             script {
                                 sh '''
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} rm -rf ~/manifests/test-env
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} mkdir -p ~/manifests/test-env
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} rm -rf manifests/test-env
+                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} mkdir -p manifests/test-env
                                     scp -r manifests/test-env ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/manifests/test-env
                                     scp scripts/deploy-manifests-test.sh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/scripts/deploy-manifests-test.sh
 
