@@ -161,16 +161,16 @@ pipeline {
                     steps {
                         sshagent(credentials: [K8S_MASTER_SSH_CREDENTIALS_ID]) {
                             script {
-                                sh '''
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} rm -rf manifests/test-env
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} mkdir -p manifests/test-env
-                                    scp -r manifests/test-env ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/manifests/test-env
-                                    scp scripts/deploy-manifests-test.sh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/scripts/deploy-manifests-test.sh
 
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} chmod +x scripts/deploy-manifests-test.sh
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} sh scripts/deploy-manifests-test.sh
-                                    ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} kubectl get all -n test
-                                '''
+                                   sh" ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} 'rm -rf manifests/test-env'"
+                                   sh" ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} 'mkdir -p /manifests/test-env'"
+                                   sh" scp -r $PWD//test-env ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:/home/ubuntu/manifests/test-env"
+                                   sh" scp $PWD/scripts/deploy-manifests-test.sh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:/home/ubuntu/scripts/deploy-manifests-test.sh"
+
+                                   sh" ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} 'chmod +x /home/ubuntu/scripts/deploy-manifests-test.sh'"
+                                   sh" ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} 'sh /home/ubuntu/scripts/deploy-manifests-test.sh'"
+                                   sh" ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} 'kubectl get all -n test'"
+
                             }
                         }
                     }
