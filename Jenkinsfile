@@ -156,20 +156,6 @@ pipeline {
                     }
                 }
 
-                stage('Scan manifests with Kubescan') {
-                    steps {
-                        sshagent(credentials: [K8S_MASTER_SSH_CREDENTIALS_ID]) {
-                            script {
-                                sh "ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} 'kubescape scan manifests/test-env/infrastructure/*.yml -v > kubescape_infrastructure_test.txt'"
-                                sh "scp ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/kubescape_infrastructure_test.txt ."
-                                sh "ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} 'kubescape scan manifests/test-env/micro-services/*.yml -v > kubescape_microservices_test.txt'"
-                                sh "scp ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/kubescape_microservices_test.txt ."
-                                sh "ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} rm -f kubescape_infrastructure_test.txt"
-                                sh "ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} rm -f kubescape_microservices_test.txt"
-                            }
-                        }
-                    }
-                }
 
                 stage('Deploy to K8s test env') {
                     steps {
@@ -183,6 +169,21 @@ pipeline {
                                     ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} sh scripts/deploy-manifests-test.sh
                                     ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} kubectl get all -n test
                                 '''
+                            }
+                        }
+                    }
+                }
+
+                stage('Scan manifests with Kubescan') {
+                    steps {
+                        sshagent(credentials: [K8S_MASTER_SSH_CREDENTIALS_ID]) {
+                            script {
+                                sh "ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} 'kubescape scan manifests/test-env/infrastructure/*.yml -v > kubescape_infrastructure_test.txt'"
+                                sh "scp ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/kubescape_infrastructure_test.txt ."
+                                sh "ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} 'kubescape scan manifests/test-env/micro-services/*.yml -v > kubescape_microservices_test.txt'"
+                                sh "scp ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST}:~/kubescape_microservices_test.txt ."
+                                sh "ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} rm -f kubescape_infrastructure_test.txt"
+                                sh "ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} rm -f kubescape_microservices_test.txt"
                             }
                         }
                     }
