@@ -79,24 +79,25 @@ pipeline {
                 }
 
                 stage('Build Docker images') {
-                    steps {
-                        script {
-                            for(def microservice in microservices) {
-                                dir("micro-services/${microservice}") {
-                                    sh "docker build -t $DOCKERHUB_USER/$microservice:$BRANCH_NAME-v$BUILD_NUMBER ."
-                                    sh "docker tag $DOCKERHUB_USER/$microservice:$BRANCH_NAME-v$BUILD_NUMBER $DOCKERHUB_USER/$microservice:latest"
-                                }
-                            }
-                            dir("edge-services/ecomm-gateway") {
-                                sh "docker build -t $DOCKERHUB_USER/ecomm-gateway:$BRANCH_NAME-v$BUILD_NUMBER ."
-                                sh "docker tag $DOCKERHUB_USER/ecomm-gateway:$BRANCH_NAME-v$BUILD_NUMBER $DOCKERHUB_USER/ecomm-gateway:latest"
-                            }
+                     steps {
+                    //     script {
+                    //         for(def microservice in microservices) {
+                    //             dir("micro-services/${microservice}") {
+                    //                 sh "docker build -t $DOCKERHUB_USER/$microservice:$BRANCH_NAME-v$BUILD_NUMBER ."
+                    //                 sh "docker tag $DOCKERHUB_USER/$microservice:$BRANCH_NAME-v$BUILD_NUMBER $DOCKERHUB_USER/$microservice:latest"
+                    //             }
+                    //         }
+                    //         dir("edge-services/ecomm-gateway") {
+                    //             sh "docker build -t $DOCKERHUB_USER/ecomm-gateway:$BRANCH_NAME-v$BUILD_NUMBER ."
+                    //             sh "docker tag $DOCKERHUB_USER/ecomm-gateway:$BRANCH_NAME-v$BUILD_NUMBER $DOCKERHUB_USER/ecomm-gateway:latest"
+                    //         }
 
                             // dir('frontend') {
                             //     // "--network=host" to avoid DNS problem while running npm ci
                             //     sh "docker build -t $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-v$BUILD_NUMBER --network=host ."
                             //     sh "docker tag $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-v$BUILD_NUMBER $DOCKERHUB_USER/ecomm-frontend:latest"
                             // }
+                            sleep(77)
                         }
                     }
                 }
