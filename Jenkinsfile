@@ -62,7 +62,7 @@ pipeline {
                 }
 
                 stage('Build frontend') {
-                    // steps {
+                    steps {
                     //     dir("frontend") {
                     //         sh "npm ci"
 
@@ -73,8 +73,9 @@ pipeline {
 
                     //         sh "CI=false npm run build"
                     //     }
-                    // }
+                    
                     sleep(66)
+                    }
                 }
 
                 stage('Build Docker images') {
@@ -207,7 +208,6 @@ pipeline {
                 //slackUploadFile filePath: '**/trivy-*.txt', initialComment: 'Check Trivy Reports!'
                 slackUploadFile filePath: '**/kubebench_CIS_*.txt', initialComment: 'Check Kube-bench Reports!'
                 slackUploadFile filePath: '**/kubescape_*.txt', initialComment: 'Check Kube-bench Reports!'
-                
             }
         }
         
