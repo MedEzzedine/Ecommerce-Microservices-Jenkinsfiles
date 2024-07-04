@@ -100,7 +100,7 @@ pipeline {
                             sleep(77)
                         }
                     }
-                }
+                
 
                 stage('Vulnerability scan') {
                     steps {
