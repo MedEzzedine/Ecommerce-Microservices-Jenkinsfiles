@@ -103,41 +103,43 @@ pipeline {
 
                 stage('Vulnerability scan') {
                     steps {
-                        script {
+                        // script {
                             
-                            sh "curl -o $PWD/html.tpl https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl"
+                        //     sh "curl -o $PWD/html.tpl https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl"
 
-                            for (def microservice in microservices) {
-                                // -q: quiet mode (avoid unnecessary output), --severity CRITICAL exit code will be 1 when a CRITICAL vulnerability is found
-                                // TODO: Add back --exit-code 1 for the final pipeline
-                                sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:/root/.cache/ -v $PWD:/tmp/.cache -v $PWD/html.tpl:/tmp/html.tpl aquasec/trivy image --scanners vuln --format template --template '@/tmp/html.tpl' $DOCKERHUB_USER/${microservice}:$BRANCH_NAME-v$BUILD_NUMBER > trivy-report-${microservice}.html"
-                                archiveArtifacts artifacts: "trivy-report-${microservice}.html", allowEmptyArchive: true
-                            }
+                        //     for (def microservice in microservices) {
+                        //         // -q: quiet mode (avoid unnecessary output), --severity CRITICAL exit code will be 1 when a CRITICAL vulnerability is found
+                        //         // TODO: Add back --exit-code 1 for the final pipeline
+                        //         sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:/root/.cache/ -v $PWD:/tmp/.cache -v $PWD/html.tpl:/tmp/html.tpl aquasec/trivy image --scanners vuln --format template --template '@/tmp/html.tpl' $DOCKERHUB_USER/${microservice}:$BRANCH_NAME-v$BUILD_NUMBER > trivy-report-${microservice}.html"
+                        //         archiveArtifacts artifacts: "trivy-report-${microservice}.html", allowEmptyArchive: true
+                        //     }
                             
-                            sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:/root/.cache/ -v $PWD/html.tpl:/tmp/html.tpl aquasec/trivy image --scanners vuln --format template --template '@/tmp/html.tpl' $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-v$BUILD_NUMBER > trivy-report-ecomm-frontend.html"
-                            archiveArtifacts artifacts: "trivy-report-ecomm-frontend.html", allowEmptyArchive: true
+                        //     sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:/root/.cache/ -v $PWD/html.tpl:/tmp/html.tpl aquasec/trivy image --scanners vuln --format template --template '@/tmp/html.tpl' $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-v$BUILD_NUMBER > trivy-report-ecomm-frontend.html"
+                        //     archiveArtifacts artifacts: "trivy-report-ecomm-frontend.html", allowEmptyArchive: true
 
-                            sh "rm $PWD/html.tpl"
-                        }
+                        //     sh "rm $PWD/html.tpl"
+                        // }
+                        sleep(14)
                     }
                 }
 
                 stage('Push to Dockerhub') {
                     steps {
-                        script {
-                            for (def microservice in microservices) {
-                                sh "docker push $DOCKERHUB_USER/$microservice:$BRANCH_NAME-v$BUILD_NUMBER)"
-                                sh "docker push $DOCKERHUB_USER/$microservice:latest"
-                            }
+                        // script {
+                        //     for (def microservice in microservices) {
+                        //         sh "docker push $DOCKERHUB_USER/$microservice:$BRANCH_NAME-v$BUILD_NUMBER)"
+                        //         sh "docker push $DOCKERHUB_USER/$microservice:latest"
+                        //     }
 
-                            // Pushing frontend
-                            // sh "docker push $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-v$BUILD_NUMBER"
-                            // sh "docker push $DOCKERHUB_USER/ecomm-frontend:latest"
+                        //     // Pushing frontend
+                        //     // sh "docker push $DOCKERHUB_USER/ecomm-frontend:$BRANCH_NAME-v$BUILD_NUMBER"
+                        //     // sh "docker push $DOCKERHUB_USER/ecomm-frontend:latest"
 
-                            // Pushing gateway
-                            sh "docker push $DOCKERHUB_USER/ecomm-gateway:$BRANCH_NAME-v$BUILD_NUMBER"
-                            sh "docker push $DOCKERHUB_USER/ecomm-gateway:latest"
-                        }   
+                        //     // Pushing gateway
+                        //     sh "docker push $DOCKERHUB_USER/ecomm-gateway:$BRANCH_NAME-v$BUILD_NUMBER"
+                        //     sh "docker push $DOCKERHUB_USER/ecomm-gateway:latest"
+                        // }   
+                        sleep(37)
                     }
                 }
 
@@ -154,7 +156,7 @@ pipeline {
                         //     sh "ssh ${K8S_MASTER_SSH_USER}@${K8S_MASTER_HOST} 'sudo rm kubebench_CIS_${env.BRANCH_NAME}.txt'"
 
                         // }
-                        sleep(15)
+                        sleep(18)
                     }
                 }
 
@@ -212,7 +214,7 @@ pipeline {
         }
         
         success {
-            slackSend color: "good", message: "¨Pipeline $BRANCH_NAME-$BUILD_NUMBER succeeded."
+            slackSend color: "good", message: "Pipeline $BRANCH_NAME-$BUILD_NUMBER succeeded."
         }
 
         failure {
